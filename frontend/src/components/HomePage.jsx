@@ -144,7 +144,10 @@ const HomePageComponent = () => {
                         {post.description || "No description available."}
                       </p>
                       <Link
-                        href={`/posts/${post._id}`}
+                        // ************************************************
+                        // ** CHANGE MADE HERE: Using post.slug for the URL **
+                        // ************************************************
+                        href={`/posts/${post.slug}`} 
                         className="text-indigo-600 font-semibold hover:underline"
                       >
                         Read More →
@@ -180,7 +183,8 @@ const HomePageComponent = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {latestPosts.map((post) => (
-              <PostCard key={post._id} post={post} />
+              // NOTE: PostCard component will need to use post.slug internally
+              <PostCard key={post._id} post={post} /> 
             ))}
           </div>
         </section>
@@ -207,6 +211,7 @@ const HomePageComponent = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {paginatedPosts.map((post) => (
+                // NOTE: PostCard component will need to use post.slug internally
                 <PostCard key={post._id} post={post} />
               ))}
             </div>
