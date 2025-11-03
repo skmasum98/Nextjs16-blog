@@ -43,7 +43,7 @@ const sendEmail = async (options) => {
         process.env.NODE_ENV === "production" ? email : process.env.EMAIL_SERVICE_USER;
 
       const resendResponse = await resend.emails.send({
-        from: `Blog App <${process.env.EMAIL_SERVICE_USER}>`, 
+        from: `Blog App <onboarding@resend.dev>`, 
         to: resendTo,
         subject,
         html: message,
