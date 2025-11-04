@@ -1,11 +1,13 @@
 import asyncHandler from "express-async-handler";
 import sendEmail from "../utils/sendEmail.js";
 import User from "../models/User.js";
+import Post from "../models/Post.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { generateTokenAndSetCookies } from "../middleware/GenerateToken.js";
 import cloudinary from "../config/cloudinaryConfig.js";
 import getDataUri from "../utils/dataUri.js";
+
 
 // Helper function to generate a JWT (used for both register and login)
 const generateToken = (id) => {
@@ -420,6 +422,37 @@ const resetPassword = asyncHandler(async (req, res) => {
   });
 });
 
+
+const getAuthorProfile = asyncHandler(async (req, res) => {
+  const authorId = req.params.id;
+
+  // 1️⃣ Fetch basic author info
+  const user = await User.findById(authorId).select("name bio profilePicture createdAt");
+
+  if (!user) {
+    res.status(404);
+    throw new Error("Author not found");
+  }
+
+  // 2️⃣ Count total posts and likes
+  const posts = await Post.find({ user: authorId });
+  const totalPosts = posts.length;
+  const totalLikes = posts.reduce((sum, post) => sum + (post.likes?.length || 0), 0);
+  const totalDislikes = posts.reduce((sum, post) => sum + (post.dislikes?.length || 0), 0);
+
+  // 3️⃣ Combine and return
+  res.json({
+    _id: user._id,
+    name: user.name,
+    bio: user.bio,
+    profilePicture: user.profilePicture,
+    createdAt: user.createdAt,
+    totalPosts,
+    totalLikes,
+    totalDislikes,
+  });
+});
+
 export {
   registerUser,
   VerifyEmail,
@@ -432,4 +465,5 @@ export {
   deleteUser,
   forgotPassword,
   resetPassword,
+  getAuthorProfile
 };

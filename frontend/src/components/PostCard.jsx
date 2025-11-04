@@ -14,12 +14,14 @@ const PostCard = ({ post }) => {
     <article className="flex flex-col bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
       {/* Featured Image */}
       <div className="relative h-48 md:h-56 w-full overflow-hidden">
+        <Link href={`/posts/${post.slug}`}>
         <img
           src={post.featuredImage || "/placeholder.jpg"}
           alt={post.title}
           className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
           onError={(e) => (e.target.src = "/placeholder.jpg")}
         />
+        </Link>
         {/* Optional category badge overlay */}
         <div className="absolute top-3 left-3 bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
           {post.category || "Uncategorized"}
@@ -27,7 +29,7 @@ const PostCard = ({ post }) => {
       </div>
 
       {/* Post Content */}
-      <div className="flex flex-col flex-grow p-5">
+      <div className="flex flex-col grow p-5">
         {/* Tags */}
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3 text-xs font-medium text-gray-500">

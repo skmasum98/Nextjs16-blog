@@ -98,7 +98,7 @@ export default async function PostDetailsPage({ params }) {
   return (
     <div className="py-10">
       {/* --- LAYOUT FIX: TWO-COLUMN MOBILE-FIRST DESIGN --- */}
-      <div className="flex flex-col-reverse lg:flex-row lg:space-x-8 max-w-7xl mx-auto">
+      <div className="flex flex-col lg:flex-row lg:space-x-8 max-w-7xl mx-auto">
         {/* 1. Main Content Column (Mobile: Full Width; Desktop: 2/3) */}
         <div className="lg:w-3/4 w-full">
           <div className="bg-white p-6 md:p-10 rounded-xl shadow-2xl">

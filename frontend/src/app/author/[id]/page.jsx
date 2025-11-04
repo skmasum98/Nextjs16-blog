@@ -1,74 +1,130 @@
-// blog-application/frontend/src/app/author/[id]/page.jsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { fetchPostsByAuthor } from '@/utils/postApi'; // New API call
-import PostCard from '@/components/PostCard';
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { fetchAuthorProfile } from "@/utils/userApi";
+import { fetchPostsByAuthor } from "@/utils/postApi";
+import PostCard from "@/components/PostCard";
+import { Loader2 } from "lucide-react";
 
 const AuthorProfilePage = () => {
-    const params = useParams();
-    const authorId = params.id;
+  const { id: authorId } = useParams();
+  const [author, setAuthor] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-    const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [authorName, setAuthorName] = useState('Author'); // Default/Placeholder
+  useEffect(() => {
+    if (!authorId) return;
 
-    useEffect(() => {
-        if (!authorId) return;
+    const loadData = async () => {
+      try {
+        const [profileData, authorPosts] = await Promise.all([
+          fetchAuthorProfile(authorId),
+          fetchPostsByAuthor(authorId),
+        ]);
+        setAuthor(profileData);
+        setPosts(authorPosts);
+      } catch (err) {
+        console.error(err);
+        setError(err.message || "Failed to load author data.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        const loadAuthorData = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                // Fetch all published posts by this author
-                const data = await fetchPostsByAuthor(authorId);
-                setPosts(data);
-                
-                // Set the author name from the first post (assuming data is not empty)
-                if (data.length > 0 && data[0].user?.name) {
-                    setAuthorName(data[0].user.name);
-                } else {
-                    // You might want to fetch the user profile explicitly if the post list is empty
-                    // For now, we'll keep the default name
-                }
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
+    loadData();
+  }, [authorId]);
 
-        loadAuthorData();
-    }, [authorId]);
-
-    if (loading) return <div className="text-center py-20 text-xl font-semibold">Loading Author Profile...</div>;
-    if (error) return <div className="text-center py-20 text-red-600">Error: {error}</div>;
-
+  if (loading) {
     return (
-        <div className="py-10 max-w-7xl mx-auto">
-            <header className="mb-10 p-6 bg-white rounded-xl shadow-lg border-b-4 border-indigo-500">
-                <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
-                    Posts by: <span className="text-indigo-600">{authorName}</span>
-                </h1>
-                <p className="text-xl text-gray-600">A passionate writer and developer sharing knowledge on modern web stacks.</p>
-            </header>
-
-            <h2 className="text-2xl font-bold mb-6">{posts.length} Published Article{posts.length !== 1 ? 's' : ''}</h2>
-
-            {posts.length === 0 ? (
-                <p className="text-center text-gray-600">This author has not published any posts yet.</p>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {posts.map((post) => (
-                        <PostCard key={post._id} post={post} /> 
-                    ))}
-                </div>
-            )}
-        </div>
+      <div className="flex justify-center items-center min-h-screen text-gray-600">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-red-600 font-semibold">
+        {error}
+      </div>
+    );
+  }
+
+  if (!author) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-gray-600">
+        Author not found.
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-10">
+      {/* ---------- Author Header ---------- */}
+      <section className="relative bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-3xl shadow-lg overflow-hidden mb-12">
+        <div className="absolute inset-0 bg-black/10 backdrop-blur-sm" />
+        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 p-10">
+          <img
+            src={author.profilePicture || "/avatar-placeholder.png"}
+            alt={author.name}
+            className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
+          />
+          <div className="text-center md:text-left">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              {author.name}
+            </h1>
+            <p className="text-indigo-100 max-w-lg">
+              {author.bio || "This author hasn’t added a bio yet."}
+            </p>
+            <p className="mt-3 text-sm text-indigo-200">
+              Joined on{" "}
+              {new Date(author.createdAt).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+              })}
+            </p>
+          </div>
+        </div>
+
+        {/* ---------- Stats ---------- */}
+        <div className="bg-white/10 backdrop-blur-lg flex justify-around md:justify-evenly py-3 text-sm font-medium rounded-b-3xl">
+          <div className="flex items-center gap-2">
+            📝 <span>{author.totalPosts || posts.length}</span>
+            <span className="text-indigo-100">Posts</span>
+          </div>
+          <div className="flex items-center gap-2">
+            ❤️ <span>{author.totalLikes || 0}</span>
+            <span className="text-indigo-100">Likes</span>
+          </div>
+          <div className="flex items-center gap-2">
+            💬 <span>{author.totalComments || 0}</span>
+            <span className="text-indigo-100">Comments</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- Author Posts ---------- */}
+      <section>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">
+          {author.name}&apos;s Articles
+        </h2>
+
+        {posts.length === 0 ? (
+          <div className="text-center text-gray-500 italic py-10">
+            No posts published yet.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {posts.map((post) => (
+              <PostCard key={post._id} post={post} />
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
 };
 
 export default AuthorProfilePage;

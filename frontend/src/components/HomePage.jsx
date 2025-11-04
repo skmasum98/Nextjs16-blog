@@ -131,11 +131,13 @@ const HomePageComponent = () => {
               {featuredPosts.map((post) => (
                 <SwiperSlide key={post._id}>
                   <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <Link href={`/posts/${post.slug}`}>
                     <img
                       src={post.featuredImage || "/placeholder.jpg"}
                       alt={post.title}
                       className="w-full h-56 object-cover"
                     />
+                    </Link>
                     <div className="p-5">
                       <h3 className="text-lg font-bold mb-2 line-clamp-2">
                         {post.title}
@@ -144,10 +146,7 @@ const HomePageComponent = () => {
                         {post.description || "No description available."}
                       </p>
                       <Link
-                        // ************************************************
-                        // ** CHANGE MADE HERE: Using post.slug for the URL **
-                        // ************************************************
-                        href={`/posts/${post.slug}`} 
+                        href={`/posts/${post.slug}`}
                         className="text-indigo-600 font-semibold hover:underline"
                       >
                         Read More →
@@ -183,8 +182,7 @@ const HomePageComponent = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {latestPosts.map((post) => (
-              // NOTE: PostCard component will need to use post.slug internally
-              <PostCard key={post._id} post={post} /> 
+              <PostCard key={post._id} post={post} />
             ))}
           </div>
         </section>
@@ -211,7 +209,6 @@ const HomePageComponent = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {paginatedPosts.map((post) => (
-                // NOTE: PostCard component will need to use post.slug internally
                 <PostCard key={post._id} post={post} />
               ))}
             </div>
